@@ -1,18 +1,13 @@
 import { Failure } from './failure';
 import { Item } from './item';
 import { Order, OrderState } from './order';
-import {
-  _payments$,
-  EventContext,
-  EventResult,
-  Event,
-} from './payments.common';
+import { Event, _payments$ } from './payments.common';
 
 export {
+  Event,
   EventContext,
   EventResult,
   IPaymentEvent,
-  Event,
   payments$,
 } from './payments.common';
 
@@ -36,14 +31,16 @@ export function init(): void {
       payload: null,
     });
     try {
-      SKPaymentQueue.defaultQueue().addTransactionObserver(_paymentTransactionObserver);
+      SKPaymentQueue.defaultQueue().addTransactionObserver(
+        _paymentTransactionObserver
+      );
       _payments$.next({
         context: Event.Context.CONNECTING_STORE,
         result: Event.Result.SUCCESS,
         payload: null,
       });
     } catch (e) {
-      const errorPayload = typeof e === 'object' ? e.message : e;
+      const errorPayload = typeof e === 'object' ? (e as any).message : e;
       console.error(new Error(`Init failed: ${errorPayload}`));
       _payments$.next({
         context: Event.Context.CONNECTING_STORE,
@@ -56,7 +53,9 @@ export function init(): void {
 
 export function tearDown(): void {
   if (_paymentTransactionObserver) {
-    SKPaymentQueue.defaultQueue().removeTransactionObserver(_paymentTransactionObserver);
+    SKPaymentQueue.defaultQueue().removeTransactionObserver(
+      _paymentTransactionObserver
+    );
   }
   _paymentTransactionObserver = null;
 }
@@ -69,7 +68,8 @@ export function fetchItems(itemIds: Array<string>): void {
   });
   const productIds: NSMutableSet<string> = NSMutableSet.alloc<string>().init();
   itemIds.forEach((value: string) => productIds.addObject(value));
-  _productRequest = SKProductsRequest.alloc().initWithProductIdentifiers(productIds);
+  _productRequest =
+    SKProductsRequest.alloc().initWithProductIdentifiers(productIds);
   /* tslint:disable: no-use-before-declare */
   _productRequestDelegate = new SKProductRequestDelegateImpl();
   /* tslint:enable: no-use-before-declare */
@@ -82,10 +82,7 @@ export function fetchItems(itemIds: Array<string>): void {
   });
 }
 
-export function buyItem(
-  item: Item,
-  userData?: string,
-): void {
+export function buyItem(item: Item, userData?: string): void {
   if (SKPaymentQueue.defaultQueue().transactions) {
     const pendingCount = SKPaymentQueue.defaultQueue().transactions.count;
     if (!pendingCount) {
@@ -94,7 +91,9 @@ export function buyItem(
         result: Event.Result.PENDING,
         payload: pendingCount + 1,
       });
-      const payment = SKMutablePayment.paymentWithProduct(<SKProduct>item.nativeValue);
+      const payment = SKMutablePayment.paymentWithProduct(
+        <SKProduct>item.nativeValue
+      );
       if (userData) {
         payment.applicationUsername = userData;
       }
@@ -106,7 +105,7 @@ export function buyItem(
           payload: item,
         });
       } catch (e) {
-        const errorPayload = typeof e === 'object' ? e.message : e;
+        const errorPayload = typeof e === 'object' ? (e as any).message : e;
         console.error(new Error(`Error while adding payment: ${errorPayload}`));
         _payments$.next({
           context: Event.Context.PROCESSING_ORDER,
@@ -122,7 +121,9 @@ export function buyItem(
       });
     }
   } else {
-    console.error(new Error('SKPaymentQueue.defaultQueue().transactions missing.'));
+    console.error(
+      new Error('SKPaymentQueue.defaultQueue().transactions missing.')
+    );
   }
 }
 
@@ -134,14 +135,16 @@ export function finalizeOrder(order: Order): void {
   });
   if (order.state === OrderState.VALID && !order.restored) {
     try {
-      SKPaymentQueue.defaultQueue().finishTransaction(<SKPaymentTransaction>order.nativeValue);
+      SKPaymentQueue.defaultQueue().finishTransaction(
+        <SKPaymentTransaction>order.nativeValue
+      );
       _payments$.next({
         context: Event.Context.FINALIZING_ORDER,
         result: Event.Result.PENDING,
         payload: order,
       });
     } catch (e) {
-      const errorPayload = typeof e === 'object' ? e.message : e;
+      const errorPayload = typeof e === 'object' ? (e as any).message : e;
       console.error(new Error(`Error while finalizing order: ${errorPayload}`));
       _payments$.next({
         context: Event.Context.FINALIZING_ORDER,
@@ -167,7 +170,7 @@ export function restoreOrders(): void {
   try {
     SKPaymentQueue.defaultQueue().restoreCompletedTransactions();
   } catch (e) {
-    const errorPayload = typeof e === 'object' ? e.message : e;
+    const errorPayload = typeof e === 'object' ? (e as any).message : e;
     console.error(new Error(`Error while restoring order: ${errorPayload}`));
     _payments$.next({
       context: Event.Context.RESTORING_ORDERS,
@@ -177,12 +180,15 @@ export function restoreOrders(): void {
   }
 }
 
-export function canMakePayments(): boolean { // TODO ?
+export function canMakePayments(): boolean {
+  // TODO ?
   return SKPaymentQueue.canMakePayments();
 }
 
 /* tslint:disable: max-classes-per-file */
-class SKProductRequestDelegateImpl extends NSObject implements SKProductsRequestDelegate {
+class SKProductRequestDelegateImpl
+  extends NSObject
+  implements SKProductsRequestDelegate {
   /* tslint:disable: variable-name */
   public static ObjCProtocols = [SKProductsRequestDelegate];
 
@@ -190,11 +196,15 @@ class SKProductRequestDelegateImpl extends NSObject implements SKProductsRequest
 
   public productsRequestDidReceiveResponse(
     request: SKProductsRequest,
-    response: SKProductsResponse,
+    response: SKProductsResponse
   ) {
     const products: NSArray<SKProduct> = response.products;
-    console.log('Invalid product identifiers: ' + JSON.stringify(
-      response.invalidProductIdentifiers.componentsJoinedByString(', ')));
+    console.log(
+      'Invalid product identifiers: ' +
+        JSON.stringify(
+          response.invalidProductIdentifiers.componentsJoinedByString(', ')
+        )
+    );
     const result: Array<Item> = [];
     for (let i = 0; i < products.count; i++) {
       result.push(new Item(products.objectAtIndex(i)));
@@ -208,10 +218,7 @@ class SKProductRequestDelegateImpl extends NSObject implements SKProductsRequest
     this._cleanup();
   }
 
-  public requestDidFailWithError(
-    request: SKRequest,
-    error: NSError,
-  ) {
+  public requestDidFailWithError(request: SKRequest, error: NSError) {
     _payments$.next({
       context: Event.Context.RETRIEVING_ITEMS,
       result: Event.Result.FAILURE,
@@ -226,7 +233,9 @@ class SKProductRequestDelegateImpl extends NSObject implements SKProductsRequest
   }
 }
 
-class SKPaymentTransactionObserverImpl extends NSObject implements SKPaymentTransactionObserver {
+class SKPaymentTransactionObserverImpl
+  extends NSObject
+  implements SKPaymentTransactionObserver {
   /* tslint:disable: variable-name */
   public static ObjCProtocols = [SKPaymentTransactionObserver];
 
@@ -234,12 +243,14 @@ class SKPaymentTransactionObserverImpl extends NSObject implements SKPaymentTran
 
   public paymentQueueUpdatedTransactions(
     queue: SKPaymentQueue,
-    transactions: NSArray<SKPaymentTransaction>,
+    transactions: NSArray<SKPaymentTransaction>
   ): void {
     _transactionHandler(queue, transactions);
   }
 
-  public paymentQueueRestoreCompletedTransactionsFinished(queue: SKPaymentQueue): void {
+  public paymentQueueRestoreCompletedTransactionsFinished(
+    queue: SKPaymentQueue
+  ): void {
     _payments$.next({
       context: Event.Context.RESTORING_ORDERS,
       result: Event.Result.SUCCESS,
@@ -249,7 +260,7 @@ class SKPaymentTransactionObserverImpl extends NSObject implements SKPaymentTran
 
   public paymentQueueRestoreCompletedTransactionsFailedWithError(
     queue: SKPaymentQueue,
-    error: NSError,
+    error: NSError
   ): void {
     _payments$.next({
       context: Event.Context.RESTORING_ORDERS,
@@ -260,12 +271,14 @@ class SKPaymentTransactionObserverImpl extends NSObject implements SKPaymentTran
 
   public paymentQueueRemovedTransactions(
     queue: SKPaymentQueue,
-    transactions: NSArray<SKPaymentTransaction>,
+    transactions: NSArray<SKPaymentTransaction>
   ): void {
     if (transactions && transactions.count) {
       for (let i = 0; i < transactions.count; i++) {
         const transaction: SKPaymentTransaction = transactions.objectAtIndex(i);
-        if (transaction.transactionState === SKPaymentTransactionState.Purchased) {
+        if (
+          transaction.transactionState === SKPaymentTransactionState.Purchased
+        ) {
           _payments$.next({
             context: Event.Context.FINALIZING_ORDER,
             result: Event.Result.SUCCESS,
@@ -299,7 +312,7 @@ class SKPaymentTransactionObserverImpl extends NSObject implements SKPaymentTran
 
 function _transactionHandler(
   queue: SKPaymentQueue,
-  transactions: NSArray<SKPaymentTransaction>,
+  transactions: NSArray<SKPaymentTransaction>
 ): void {
   _payments$.next({
     context: Event.Context.PROCESSING_ORDER,
@@ -327,8 +340,10 @@ function _transactionHandler(
           try {
             queue.finishTransaction(transaction);
           } catch (e) {
-            const errorPayload = typeof e === 'object' ? e.message : e;
-            console.error(new Error(`Error while finalizing failed order: ${errorPayload}`));
+            const errorPayload = typeof e === 'object' ? (e as any).message : e;
+            console.error(
+              new Error(`Error while finalizing failed order: ${errorPayload}`)
+            );
           }
           break;
         case SKPaymentTransactionState.Restored:
@@ -345,8 +360,12 @@ function _transactionHandler(
           try {
             queue.finishTransaction(transaction);
           } catch (e) {
-            const errorPayload = typeof e === 'object' ? e.message : e;
-            console.error(new Error(`Error while finalizing restored order: ${errorPayload}`));
+            const errorPayload = typeof e === 'object' ? (e as any).message : e;
+            console.error(
+              new Error(
+                `Error while finalizing restored order: ${errorPayload}`
+              )
+            );
           }
           break;
         case SKPaymentTransactionState.Purchasing:
@@ -364,5 +383,3 @@ function _transactionHandler(
     payload: queue.transactions ? queue.transactions.count : 0,
   });
 }
-
-/* tslint:enable: max-classes-per-file */

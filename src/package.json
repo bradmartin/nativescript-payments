@@ -1,6 +1,6 @@
 {
   "name": "nativescript-payments",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "A NativeScript plugin for in-app payments",
   "main": "index",
   "typings": "index.d.ts",
@@ -13,10 +13,10 @@
   },
   "scripts": {
     "tns": "tns",
-    "lint": "tslint --force --fix --project tsconfig.json",
+    "tslint": "cd .. && tslint \"**/*.ts\" --config tslint.json --exclude \"**/node_modules/**\" --exclude \"**/platforms/**\" --exclude \"**/typings/**\"",
     "nuke": "rm -rf node_modules/ package-lock.json",
     "nuki": "npm run nuke && npm i",
-    "build": "npm run lint && tsc",
+    "build": "npm run tslint && tsc",
     "prepack": "npm run build && cp ../LICENSE ./LICENSE && cp ../README.md ./README.md",
     "postpack": "rm ./LICENSE ./README.md",
     "android-dts": "cd ../android && java -jar dts-generator-32ad4e0.jar -input libs/used-billing.jar",
@@ -50,18 +50,13 @@
   "license": "MIT",
   "homepage": "https://github.com/DickSmith/nativescript-payments",
   "readmeFilename": "README.md",
-  "peerDependencies": {
-    "tns-core-modules": ">=5.1.2",
-    "rxjs": "^6.0.0"
-  },
   "devDependencies": {
     "prompt": "^1.0.0",
     "rimraf": "^2.5.0",
     "rxjs": "^6.0.0",
-    "tns-core-modules": "~5.1.2",
-    "tns-platform-declarations": "~5.1.2",
-    "tslint": "~5.12.1",
-    "typescript": "~3.2.2"
-  },
-  "bootstrapper": "nativescript-plugin-seed"
+    "@nativescript/core": "~8.1.3",
+    "@nativescript/types": "~8.1.1",
+    "tslint": "~6.1.3",
+    "typescript": "~4.4.3"
+  }
 }

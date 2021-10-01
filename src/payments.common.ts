@@ -1,11 +1,10 @@
+import { ConnectableObservable, ReplaySubject } from 'rxjs';
+import { publish } from 'rxjs/operators';
 import { Failure } from './failure';
 import { Item } from './item';
 import { Order } from './order';
-import { ConnectableObservable, ReplaySubject } from 'rxjs';
-import { publish } from 'rxjs/operators';
 
 export namespace Event {
-
   export enum Context {
     CONNECTING_STORE = 'CONNECTING_STORE',
     RETRIEVING_ITEMS = 'RETRIEVING_ITEMS',
@@ -21,7 +20,14 @@ export namespace Event {
     FAILURE = 'FAILURE',
   }
 
-  type IPayload = Failure | Item | Order | Array<Item> | Array<string> | number | null;
+  type IPayload =
+    | Failure
+    | Item
+    | Order
+    | Array<Item>
+    | Array<string>
+    | number
+    | null;
 
   interface IEvent {
     context: Context;
@@ -60,10 +66,10 @@ export namespace Event {
   }
 
   export type ConnectingStore =
-    ConnectingStore.IStarted |
-    ConnectingStore.IPending |
-    ConnectingStore.ISuccess |
-    ConnectingStore.IFailure;
+    | ConnectingStore.IStarted
+    | ConnectingStore.IPending
+    | ConnectingStore.ISuccess
+    | ConnectingStore.IFailure;
 
   /**
    * Retrieving Items Events
@@ -96,10 +102,10 @@ export namespace Event {
   }
 
   export type RetrievingItems =
-    RetrievingItems.IStarted |
-    RetrievingItems.IPending |
-    RetrievingItems.ISuccess |
-    RetrievingItems.IFailure;
+    | RetrievingItems.IStarted
+    | RetrievingItems.IPending
+    | RetrievingItems.ISuccess
+    | RetrievingItems.IFailure;
 
   /**
    * Processing Order Events
@@ -132,10 +138,10 @@ export namespace Event {
   }
 
   export type ProcessingOrder =
-    ProcessingOrder.IStarted |
-    ProcessingOrder.IPending |
-    ProcessingOrder.ISuccess |
-    ProcessingOrder.IFailure;
+    | ProcessingOrder.IStarted
+    | ProcessingOrder.IPending
+    | ProcessingOrder.ISuccess
+    | ProcessingOrder.IFailure;
 
   /**
    * Finalizing Order Events
@@ -168,10 +174,10 @@ export namespace Event {
   }
 
   export type FinalizingOrder =
-    FinalizingOrder.IStarted |
-    FinalizingOrder.IPending |
-    FinalizingOrder.ISuccess |
-    FinalizingOrder.IFailure;
+    | FinalizingOrder.IStarted
+    | FinalizingOrder.IPending
+    | FinalizingOrder.ISuccess
+    | FinalizingOrder.IFailure;
 
   /**
    * Restoring Orders Events
@@ -204,17 +210,17 @@ export namespace Event {
   }
 
   export type RestoringOrders =
-    RestoringOrders.IStarted |
-    RestoringOrders.IPending |
-    RestoringOrders.ISuccess |
-    RestoringOrders.IFailure;
+    | RestoringOrders.IStarted
+    | RestoringOrders.IPending
+    | RestoringOrders.ISuccess
+    | RestoringOrders.IFailure;
 
   export type Type =
-    ConnectingStore |
-    RetrievingItems |
-    ProcessingOrder |
-    FinalizingOrder |
-    RestoringOrders;
+    | ConnectingStore
+    | RetrievingItems
+    | ProcessingOrder
+    | FinalizingOrder
+    | RestoringOrders;
 }
 
 /**
@@ -234,11 +240,14 @@ export const EventResult = Event.Result;
 /**
  * @private DO NOT USE!
  */
-export const _payments$: ReplaySubject<Event.Type> = new ReplaySubject<Event.Type>(128);
+export const _payments$: ReplaySubject<Event.Type> =
+  new ReplaySubject<Event.Type>(128);
 /**
  * ConnectableObservable to receive results and events
  */
-export const payments$: ConnectableObservable<Event.Type> = <ConnectableObservable<Event.Type>>_payments$.pipe(publish());
+export const payments$: ConnectableObservable<Event.Type> = <
+  ConnectableObservable<Event.Type>
+>_payments$.pipe(publish());
 
 // const _storeConnecting$: Subject<any> = new Subject<any>();
 // const _itemsRetrieving$: Subject<any> = new Subject<any>();

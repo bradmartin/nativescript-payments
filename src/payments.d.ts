@@ -2,11 +2,11 @@ import { Item } from './item';
 import { Order } from './order';
 
 export {
+  Event,
   EventContext,
   EventResult,
   IPaymentEvent,
-  payments$,
-  Event,
+  payments$
 } from './payments.common';
 
 export declare function init(): void;
@@ -15,10 +15,7 @@ export declare function tearDown(): void;
 
 export declare function fetchItems(itemIds: Array<string>): void;
 
-export declare function buyItem(
-  item: Item,
-  userData?: string,
-): void;
+export declare function buyItem(item: Item, userData?: string): void;
 
 export declare function finalizeOrder(order: Order): void;
 

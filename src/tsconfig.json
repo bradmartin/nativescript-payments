@@ -32,8 +32,7 @@
   },
   "include": [
     // refs
-    "node_modules/tns-platform-declarations/android.d.ts",
-    "node_modules/tns-platform-declarations/ios.d.ts",
+    "references.d.ts",
     "typings/*",
     // srcs
     "index.ts",

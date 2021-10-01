@@ -8,26 +8,26 @@ For payments via Google Play or iTunes utilizing RxJS.
 ## Installation
 
 ```bash
-tns plugin add nativescript-payments
+ns plugin add nativescript-payments
 ```
 
-## Usage 
+## Usage
 
-***TODO***
+**_TODO_**
 
-	```javascript
+    ```javascript
     Usage code snippets here
     ```)
 
 ## API
 
-*** TODO ***
-    
-| Property | Default | Description |
-| --- | --- | --- |
-| some property | property default value | property description, default values, etc.. |
+**_ TODO _**
+
+| Property         | Default                | Description                                 |
+| ---------------- | ---------------------- | ------------------------------------------- |
+| some property    | property default value | property description, default values, etc.. |
 | another property | property default value | property description, default values, etc.. |
-    
+
 ## License
 
 MIT
